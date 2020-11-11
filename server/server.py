@@ -34,7 +34,7 @@ def upload_file():
     preprocessed_data = preprocess_request(data)
     query_embedding = encoder.predict(preprocessed_data)
     query_embedding = np.reshape(query_embedding, (LATENT_DIM,))
-    nearest_embeddings = search_embedding(pred, tree, index_dict, 5)
+    nearest_embeddings = search_embedding(query_embedding, tree, index_dict, 5)
 
 if __name__ == "__main__":
   app.run()
