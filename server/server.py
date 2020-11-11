@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 
 
-encoder = load_model(LOAD_MODEL_PATH + "encoder.h5")
+encoder = load_model(LOAD_MODEL_PATH + "/encoder.h5", compile=False)
 tree, index_dict = read_database(TREE_PATH, INDEX_DICT_PATH)
 
 app = Flask(__name__)
