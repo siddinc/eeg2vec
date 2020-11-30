@@ -13,8 +13,10 @@ from utilities import (
   custom_acc,
 )
 import os
+import json
 import pandas as pd
 import numpy as np
+import time
 
 
 app = Flask(__name__)
@@ -32,9 +34,10 @@ for i in range(109):
 def upload_file():
   if request.method == "POST":
     
-    preprocessed_data = preprocess_request(data)
-
-    query_subject = get_data(subject_no=subject_id, data_no=4)
+    subject_id = int(request.form['subject_id'])
+    data_no = int(request.form['data_no'])
+    start_time = time.time()
+    query_subject = get_data(subject_no=subject_id, data_no=data_no)
     query_subject = np.reshape(query_subject, (query_subject.shape[0], 1))
     input_pair_group = np.zeros((109, 2, 3000, 1), dtype=np.float64)
     count = 0
@@ -53,6 +56,10 @@ def upload_file():
       subject_results.append((i, j))
 
     subject_results.sort(key=lambda e: e[1], reverse=True)
+    end_time = time.time()
+    final_result = [ i for i in subject_results[:6] if i[1]>0.7 ]
+    response = { "results": final_result, "inference_time": end_time-start_time }
+    return json.dumps(str(response))
 
 
 
