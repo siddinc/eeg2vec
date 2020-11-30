@@ -1,7 +1,9 @@
+from tensorflow.keras.models import model_from_json
 import numpy as np
 import pickle
 import random
-import vptree as vp
+import pandas as pd
+import os
 
 
 def get_euclidean(x, y):
@@ -19,46 +21,21 @@ def preprocess_request(vector):
   return reshaped_vector
 
 
-def construct_tree(points, dist_fn, tree_path):
-  print("constructing VP Tree")
-  tree = vp.VPTree(points, dist_fn)
-
-  print("serializing VP Tree")
-  with open(tree_path, 'wb') as f:
-    f.write(pickle.dumps(tree))
-
-
-def read_database(tree_path, index_dict_path):
-  if tree_path == None:
-    index_dict = pickle.loads(open(index_dict_path, 'rb').read())
-    return index_dict
-  if index_dict_path == None:
-    tree = pickle.loads(open(tree_path, 'rb').read())
-    return tree
-  index_dict = pickle.loads(open(index_dict_path, 'rb').read())
-  tree = pickle.loads(open(tree_path, 'rb').read())
-  return (tree, index_dict)
-
-
-def search_embedding(query_embedding, tree, index_dict, limit):
-  nearest_embeddings = []
-  results = tree.get_n_nearest_neighbors(query_embedding, limit)
-  results.sort(key=lambda e: e[0])
-  return results
-
-#   for i,j in result:
-#     path = index_dict[tuple(j)]
-#     title = path.split('_')[1].split('.')[0]
-#     eu_dist = i
-
-
-#     nearest_images.append({
-#       "path": path,
-#       "title": title,
-#       "eu_dist": eu_dist
-#     })
-#   return nearest_images
-
-
 def np2csv(x, file_name):
     np.savetxt(file_name, x, delimiter=",", header="data")
+
+
+def load_model(weights_path, model_json_path):
+  with open(model_json_path, 'r') as json_file:
+    loaded_model_json = json_file.read()
+
+  loaded_model = model_from_json(loaded_model_json)
+  loaded_model.load_weights(weights_path)
+  return loaded_model
+
+
+def get_data(subject_no=0, data_no=1):
+  start = data_no*3000
+  csv_data = pd.read_csv("../database/test_dataset.csv")
+  subject_query = np.array(csv_data[str(subject_no)][start:start+3000])
+  return subject_query
