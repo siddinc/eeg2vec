@@ -1,39 +1,31 @@
-from tensorflow.keras.models import load_model, model_from_json
 from flask import Flask, request
 from constants import (
   UPLOAD_FOLDER_PATH,
-  LOAD_MODEL_PATH, TREE_PATH,
-  INDEX_DICT_PATH,
-  LATENT_DIM
+  LOAD_MODEL_PATH,
+  LOAD_DB_PATH
 )
 from utilities import (
   preprocess_request,
   get_data,
   contrastive_loss,
   custom_acc,
+  load_siamese_net,
+  load_db,
 )
-import os
 import json
-import pandas as pd
 import numpy as np
 import time
 
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER_PATH
-
-loaded_model = load_model(LOAD_MODEL_PATH + "/resnet.h5", custom_objects={"contrastive_loss": contrastive_loss, "custom_acc": custom_acc})
-csv_data = pd.read_csv("../database/test_dataset.csv")
-
-subject_data = []
-for i in range(109):
-  subject_data.append(np.array(csv_data[str(i)][:3000]))
+loaded_model = None
+subject_data = None
 
 
-@app.route("/", methods=["POST"])
+@app.route("/api/predict", methods=["POST"])
 def upload_file():
   if request.method == "POST":
-    
     subject_id = int(request.form['subject_id'])
     data_no = int(request.form['data_no'])
     start_time = time.time()
@@ -58,10 +50,15 @@ def upload_file():
     subject_results.sort(key=lambda e: e[1], reverse=True)
     end_time = time.time()
     final_result = [ i for i in subject_results[:6] if i[1]>0.7 ]
-    response = { "results": final_result, "inference_time": end_time-start_time }
+    response = { "results": final_result, "inference_time": round(end_time-start_time, 2) }
     return json.dumps(str(response))
 
 
-
 if __name__ == "__main__":
+  loaded_model = load_siamese_net(LOAD_MODEL_PATH + "/resnet.h5")
+  print("[INFO]: Model Loaded")
+
+  subject_data = load_db(LOAD_DB_PATH + "/test_dataset.csv")
+  print("[INFO]: DB Loaded")
+
   app.run()
