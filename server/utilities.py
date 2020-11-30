@@ -1,4 +1,5 @@
 from tensorflow.keras.models import model_from_json
+from tensorflow.keras import backend as K
 import numpy as np
 import pickle
 import random
@@ -39,3 +40,12 @@ def get_data(subject_no=0, data_no=1):
   csv_data = pd.read_csv("../database/test_dataset.csv")
   subject_query = np.array(csv_data[str(subject_no)][start:start+3000])
   return subject_query
+
+
+def contrastive_loss(y_true, y_pred):
+  margin = 1.0
+  return K.mean(y_true * K.square(y_pred) + (1.0 - y_true) * K.square(K.maximum(margin - y_pred, 0.0)))
+
+
+def custom_acc(y_true, y_pred):
+  return K.mean(K.equal(y_true, K.cast(y_pred < 0.5, y_true.dtype)))
