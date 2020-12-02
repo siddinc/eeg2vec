@@ -38,7 +38,7 @@ def upload_file():
       input_data = np.reshape(input_data, (input_data.shape[0], 1))
       input_pair_group[i,0,:,:] = query_subject
       input_pair_group[i,1,:,:] = input_data
-      
+
     pred = loaded_model([input_pair_group[:,0], input_pair_group[:,1]])
     pred = 1.0 - np.reshape(pred, (pred.shape[0],))
 

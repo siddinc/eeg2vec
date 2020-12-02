@@ -13,10 +13,6 @@ def preprocess_request(vector):
   return reshaped_vector
 
 
-def np2csv(x, file_name):
-    np.savetxt(file_name, x, delimiter=",", header="data")
-
-
 # def load_model(weights_path, model_json_path):
 #   with open(model_json_path, 'r') as json_file:
 #     loaded_model_json = json_file.read()
@@ -43,7 +39,13 @@ def custom_acc(y_true, y_pred):
 
 
 def load_siamese_net(model_path):
-  loaded_model = load_model(model_path, custom_objects={"contrastive_loss": contrastive_loss, "custom_acc": custom_acc})
+  loaded_model = load_model(
+    model_path,
+    custom_objects={
+      "contrastive_loss": contrastive_loss,
+      "custom_acc": custom_acc
+    }
+  )
   return loaded_model
 
 
